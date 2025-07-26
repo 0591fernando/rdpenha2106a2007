@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Analítico de Custos (8 Páginas)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+        }
+        .chart-container {
+            position: relative;
+            flex-grow: 1;
+        }
+        .page-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+        .page-btn.active {
+            background-color: #1e40af;
+            color: white;
+            box-shadow: 0 4px 14px 0 rgb(0 0 0 / 0.1);
+        }
+        .page-btn:not(.active) {
+            background-color: #eef2ff;
+            color: #312e81;
+        }
+        .page-content {
+            display: none;
+        }
+        .page-content.active {
+            display: block;
+        }
+        .analysis-text {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.9rem;
+            color: #374151;
+            line-height: 1.6;
+        }
+        .custom-select {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+            background-color: #f9fafb;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+
+    <div class="max-w-screen-xl mx-auto">
+        <header class="mb-8 text-center">
+            <h1 id="main-title" class="text-4xl font-bold text-gray-800">Relatório de Custos de Material e Atendimento</h1>
+            <p class="text-xl text-gray-600 mt-2">Cliente: SAS-Seconci</p>
+            <p class="text-lg text-gray-500 mt-1">Território: Penha</p>
+        </header>
+        <div class="mt-6 flex flex-wrap justify-center items-center gap-2">
+            <button id="btnPage1" class="page-btn active">1. Análise Individual</button>
+            <button id="btnPage2" class="page-btn">2. Visão Financeira</button>
+            <button id="btnPage3" class="page-btn">3. Atendimentos</button>
+            <button id="btnPage4" class="page-btn">4. Custos</button>
+            <button id="btnPage5" class="page-btn">5. Metas</button>
+            <button id="btnPage6" class="page-btn">6. Correlação</button>
+            <button id="btnPage7" class="page-btn">7. Concentração</button>
+            <button id="btnPage8" class="page-btn">8. Comparativo</button>
+        </div>
+
+        <main class="mt-8">
+            <div id="page1" class="page-content active"><div class="card"><h2 class="text-2xl font-semibold text-gray-700 mb-4">Análise Individual por Unidade</h2><select id="unitSelector" class="custom-select mb-4"><option value="">Selecione uma unidade...</option></select><div class="chart-container"><canvas id="unitDetailChart"></canvas></div><p class="analysis-text"><strong>Análise:</strong> Selecione uma unidade na lista acima para visualizar um resumo de seus principais indicadores: o <strong>número total de atendimentos</strong> realizados e o <strong>valor total gasto com materiais</strong>. Esta análise permite uma avaliação rápida e direta da operação de cada local, comparando o volume de trabalho com o custo de material associado.</p></div></div>
+            <div id="page2" class="page-content"><div class="card"><h2 class="text-2xl font-semibold text-gray-700 mb-4">Valor Contratual vs. Custo Realizado</h2><div class="chart-container"><canvas id="contractChart"></canvas></div><p class="analysis-text"><strong>Análise:</strong> O gráfico mostra que o custo total realizado no período foi de <strong>R$ 52.453,62</strong> (barra azul). Este valor representa <strong>64,3%</strong> do valor total contratado de <strong>R$ 81.525,68</strong> (barra cinza). A análise indica que, até o momento, os gastos estão controlados e há uma margem orçamentária significativa disponível.</p></div></div>
+            <div id="page3" class="page-content"><div class="card"><h2 class="text-2xl font-semibold text-gray-700 mb-4">Ranking por Nº de Atendimentos</h2><div class="chart-container"><canvas id="ordersRankChart"></canvas></div><p class="analysis-text"><strong>Análise:</strong> O ranking mostra as unidades com maior volume de trabalho. A <strong>AMA JARDIM NORDESTE</strong> se destaca com <strong>648 atendimentos</strong>, seguida pela <strong>UBS JARDIM MARINGA</strong> com <strong>40</strong>. Estes dados são essenciais para entender a demanda operacional de cada local.</p></div></div>
+            <div id="page4" class="page-content"><div class="card"><h2 class="text-2xl font-semibold text-gray-700 mb-4">Ranking de Unidades por Custo Total</h2><div class="chart-container"><canvas id="spendingRankChart"></canvas></div><p class="analysis-text"><strong>Análise:</strong> Este ranking destaca as unidades com os maiores custos totais. A <strong>AMA JARDIM NORDESTE</strong> lidera com um custo de <strong>R$ 20.064,90</strong>, seguida pela <strong>AMA MAURICE PATE</strong> com <strong>R$ 2.322,33</strong>. Essas duas unidades sozinhas representam uma parcela significativa dos gastos do período.</p></div></div>
+            <div id="page5" class="page-content"><div class="card"><h2 class="text-2xl font-semibold text-gray-700 mb-4">Desempenho em Relação à Meta de Atendimentos</h2><div class="chart-container"><canvas id="goalChart"></canvas></div><p class="analysis-text"><strong>Análise:</strong> Este gráfico mede o sucesso de cada unidade em atingir sua meta de atendimentos. Das 36 unidades, <strong>10 (em verde) bateram ou superaram a meta</strong>, indicando alta produtividade, com destaque para a <strong>AMA JARDIM NORDESTE (720%)</strong> e a <strong>AMA/UBS PADRE MANOEL DA NÓBREGA (170,45%)</strong>. As outras <strong>26 unidades (em vermelho)</strong> não atingiram o objetivo, como o <strong>CER ARTHUR ALVIM* (0%)</strong> e a <strong>UBS VILA ESPERANÇA DR. EMÍLIO SANTIAGO DE OLIVEIRA (17,27%)</strong>, sinalizando um grande desequilíbrio na performance que precisa ser investigado.</p></div></div>
+            <div id="page6" class="page-content"><div class="card"><h2 class="text-2xl font-semibold text-gray-700 mb-4">Correlação Custo Total vs. Nº de Atendimentos</h2><div class="chart-container"><canvas id="correlationChart"></canvas></div><p class="analysis-text"><strong>Análise:</strong> O gráfico de dispersão mostra a relação entre o custo e o volume de cada unidade. A maioria se concentra no canto inferior esquerdo (baixo custo, baixo volume). A unidade <strong>AMA JARDIM NORDESTE</strong> é o principal motor da operação, com alta demanda e alto custo. A ausência de pontos no canto superior esquerdo (alto custo, baixo volume) é um bom indicador de controle.</p></div></div>
+            <div id="page7" class="page-content"><div class="card"><h2 class="text-2xl font-semibold text-gray-700 mb-4">Análise de Pareto (Princípio 80/20)</h2><div class="chart-container"><canvas id="paretoChart"></canvas></div><p class="analysis-text"><strong>Análise:</strong> A análise de Pareto confirma a alta concentração de custos. A linha laranja indica que aproximadamente <strong>80% do custo total</strong> está concentrado em apenas <strong>15 das 36 unidades</strong>. Isso significa que o resultado financeiro geral é fortemente influenciado por um pequeno grupo de unidades.</p></div></div>
+            <div id="page8" class="page-content"><div class="card"><h2 class="text-2xl font-semibold text-gray-700 mb-4">Comparativo de Performance de Unidades</h2><div class="grid grid-cols-2 gap-4 mb-4"><select id="unitSelector1" class="custom-select"></select><select id="unitSelector2" class="custom-select"></select></div><div class="chart-container"><canvas id="radarChart"></canvas></div><p class="analysis-text"><strong>Análise:</strong> Selecione duas unidades para uma comparação direta de performance. O gráfico de radar avalia cada unidade em três eixos: Custo Total, Nº de Atendimentos e Atingimento da Meta (%). Uma área maior no gráfico indica uma performance geral mais forte e equilibrada entre os indicadores.</p></div></div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const originalData = [
+                { unidade: "HOSPITAL DIA PENHA", meta: 90, ordens: 68, material: 1753.04, total: 2105.58 },
+                { unidade: "CAPS ALCOOL E DROGAS II PENHA", meta: 22, ordens: 22, material: 567.16, total: 681.22 },
+                { unidade: "AMA JARDIM NORDESTE", meta: 90, ordens: 648, material: 16705.44, total: 20064.90 },
+                { unidade: "UBS VILA ARICANDUVA", meta: 44, ordens: 12, material: 309.36, total: 371.57 },
+                { unidade: "CAPS INFANTOJUVENIL III PENHA", meta: 22, ordens: 37, material: 953.86, total: 1145.68 },
+                { unidade: "UBS CIDADE PATRIARCA", meta: 44, ordens: 37, material: 953.86, total: 1145.68 },
+                { unidade: "CAPS ADULTO III VILA MATILDE", meta: 22, ordens: 22, material: 567.16, total: 681.22 },
+                { unidade: "AMA/UBS CHACARA CRUZEIRO DO SUL", meta: 44, ordens: 22, material: 567.16, total: 681.22 },
+                { unidade: "UBS VILA GRANADA DR. ALFREDO FERREIRA", meta: 44, ordens: 34, material: 876.62, total: 1052.79 },
+                { unidade: "UBS VILA ESPERANÇA DR. EMÍLIO SANTIAGO DE", meta: 44, ordens: 13, material: 335.14, total: 402.54 },
+                { unidade: "AMA VILA SILVIA", meta: 88, ordens: 88, material: 2268.64, total: 2724.86 },
+                { unidade: "AMA MAURICE PATE", meta: 88, ordens: 75, material: 1933.50, total: 2322.33 },
+                { unidade: "UBS VILA ESPERANÇA DR. CÁSSIO BITTENCOURT", meta: 44, ordens: 72, material: 1856.16, total: 2229.43 },
+                { unidade: "UBS VILA GUILHERMINA DR. AMÉRICO RASPA NETO", meta: 44, ordens: 48, material: 1237.44, total: 1486.29 },
+                { unidade: "UBS CANGAIBA DR. CARLOS GENTILE DE MELLO", meta: 44, ordens: 14, material: 360.92, total: 433.50 },
+                { unidade: "UBS ENGENHEIRO TRINDADE", meta: 44, ordens: 31, material: 799.18, total: 959.90 },
+                { unidade: "UBS ANTÔNIO ESTEVÃO DE CARVALHO", meta: 44, ordens: 31, material: 799.18, total: 959.90 },
+                { unidade: "UBS PARQUE ARTHUR ALVIM", meta: 44, ordens: 23, material: 592.94, total: 712.18 },
+                { unidade: "UBS PADRE JOSÉ DE ANCHIETA", meta: 44, ordens: 35, material: 902.30, total: 1083.75 },
+                { unidade: "CER III PENHA", meta: 22, ordens: 14, material: 360.92, total: 433.50 },
+                { unidade: "UBS JARDIM SÃO NICOLAU", meta: 44, ordens: 23, material: 592.94, total: 712.18 },
+                { unidade: "AMA ENGENHEIRO GOULART DR. JOSÉ PIRES", meta: 44, ordens: 81, material: 2088.18, total: 2508.11 },
+                { unidade: "CAPS ALCOOL E DROGAS II CANGAIBA", meta: 22, ordens: 16, material: 412.48, total: 495.43 },
+                { unidade: "UBS JARDIM MARINGA", meta: 44, ordens: 40, material: 1031.20, total: 1238.57 },
+                { unidade: "AMA PADRE MANOEL DA NÓBREGA", meta: 88, ordens: 15, material: 386.70, total: 464.47 },
+                { unidade: "CTA PENHA", meta: 44, ordens: 10, material: 257.80, total: 309.64 },
+                { unidade: "UAA PENHA", meta: 22, ordens: 13, material: 335.14, total: 402.54 },
+                { unidade: "CER ARTHUR ALVIM*", meta: 44, ordens: 0, material: 0, total: 0 },
+                { unidade: "UBS JARDIM SÃO FRANCISCO", meta: 44, ordens: 28, material: 721.84, total: 867.00 },
+                { unidade: "UBS ENGENHEIRO GOULART - DR. JOSE PIRES", meta: 44, ordens: 22, material: 567.16, total: 681.22 },
+                { unidade: "UBS VILA MATILDE", meta: 44, ordens: 36, material: 928.08, total: 1114.61 },
+                { unidade: "UBS DR. ANTÔNIO PIRES F. VILLALOBO", meta: 44, ordens: 39, material: 1005.42, total: 1207.61 },
+                { unidade: "RESIDÊNCIA TERAPÊUTICA MISTA PENHA", meta: 22, ordens: 14, material: 360.92, total: 433.50 },
+                { unidade: "CEO II PENHA", meta: 44, ordens: 11, material: 283.58, total: 340.61 },
+                { unidade: "UBS CANGAIBA DR. CARLOS GENTILE DE MELLO", meta: 44, ordens: 0, material: 0, total: 0 },
+                { unidade: "UBS PADRE MANOEL DA NÓBREGA", meta: 44, ordens: 0, material: 0, total: 0 },
+                { unidade: "UBS VILA SILVIA", meta: 44, ordens: 0, material: 0, total: 0 },
+            ];
+            const contractValue = 81525.68;
+
+            const aggregatedData = Array.from(originalData.reduce((map, item) => {
+                const key = item.unidade.trim();
+                const current = map.get(key) || { ...item, ordens: 0, total: 0, meta: item.meta, material: 0 };
+                current.ordens += item.ordens;
+                current.total += item.total;
+                current.material += item.material;
+                map.set(key, current);
+                return map;
+            }, new Map()).values());
+
+            let chartInstances = {};
+            const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
+            const buttons = Array.from({length: 8}, (_, i) => document.getElementById(`btnPage${i + 1}`));
+            const pages = Array.from({length: 8}, (_, i) => document.getElementById(`page${i + 1}`));
+            
+            Chart.register(ChartDataLabels);
+
+            function showPage(pageNum) {
+                pages.forEach((page, index) => {
+                    if (page) page.classList.toggle('active', (index + 1) === pageNum);
+                });
+                buttons.forEach((btn, index) => {
+                    if (btn) btn.classList.toggle('active', (index + 1) === pageNum);
+                });
+                updateDashboard(pageNum);
+            }
+            buttons.forEach((btn, index) => {
+                if (btn) btn.addEventListener('click', () => showPage(index + 1));
+            });
+
+            function createChart(canvasId, config) {
+                if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
+                const ctx = document.getElementById(canvasId);
+                if (ctx) {
+                    chartInstances[canvasId] = new Chart(ctx, config);
+                }
+            }
+
+            const renderFunctions = {
+                2: () => {
+                    const totalRealizado = aggregatedData.reduce((sum, item) => sum + item.total, 0);
+                    createChart('contractChart', {
+                        type: 'bar', data: { labels: ['Valor'], datasets: [{ label: 'Custo Realizado', data: [totalRealizado], backgroundColor: '#2563eb' }, { label: 'Valor Contratual', data: [contractValue], backgroundColor: '#d1d5db' }] },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: true, anchor: 'end', align: 'top', formatter: (value) => formatCurrency(value), color: '#374151', font: { weight: 'bold' } } }, scales: { y: { ticks: { callback: value => formatCurrency(value) } } } }
+                    });
+                },
+                3: () => {
+                    const sortedByOrders = [...aggregatedData].sort((a, b) => b.ordens - a.ordens).filter(d => d.ordens > 0);
+                    createChart('ordersRankChart', {
+                        type: 'bar', data: { labels: sortedByOrders.map(d => d.unidade), datasets: [{ label: 'Nº de Atendimentos', data: sortedByOrders.map(d => d.ordens), backgroundColor: '#047857' }] },
+                        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, datalabels: { display: false } } }
+                    });
+                },
+                4: () => {
+                    const sortedBySpending = [...aggregatedData].sort((a, b) => b.total - a.total).filter(d => d.total > 0);
+                    createChart('spendingRankChart', {
+                        type: 'bar', data: { labels: sortedBySpending.map(d => d.unidade), datasets: [{ label: 'Custo Total', data: sortedBySpending.map(d => d.total), backgroundColor: '#be185d' }] },
+                        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { x: { ticks: { callback: value => formatCurrency(value) } } } }
+                    });
+                },
+                5: () => {
+                     const goalData = aggregatedData.map(item => ({ ...item, percent: item.meta > 0 ? (item.ordens / item.meta) * 100 : 0 })).sort((a, b) => b.percent - a.percent).filter(d => d.ordens > 0);
+                    createChart('goalChart', {
+                        type: 'bar', data: { labels: goalData.map(d => d.unidade), datasets: [{ label: '% da Meta Atingida', data: goalData.map(d => d.percent), backgroundColor: (context) => context.raw >= 100 ? '#16a34a' : '#dc2626' }] },
+                        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, datalabels: { display: false }, tooltip: { callbacks: { label: (context) => `% Atingido: ${goalData[context.dataIndex].percent.toFixed(2)}% (Realizado: ${goalData[context.dataIndex].ordens} / Meta: ${goalData[context.dataIndex].meta})` } } }, scales: { x: { ticks: { callback: value => `${value.toFixed(0)}%` } } } }
+                    });
+                },
+                6: () => {
+                     createChart('correlationChart', {
+                        type: 'scatter', data: { datasets: [{ label: 'Unidade', data: aggregatedData.map(d => ({ x: d.ordens, y: d.total })), backgroundColor: '#075985' }] },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false }, tooltip: { callbacks: { label: (context) => `${aggregatedData[context.dataIndex].unidade}: ${context.parsed.x} atendimentos - ${formatCurrency(context.parsed.y)}` } } }, scales: { x: { title: { display: true, text: 'Nº de Atendimentos' } }, y: { title: { display: true, text: 'Custo Total' }, ticks: { callback: value => formatCurrency(value) } } } }
+                    });
+                },
+                7: () => {
+                    const sortedBySpending = [...aggregatedData].sort((a, b) => b.total - a.total).filter(d => d.total > 0);
+                    const grandTotal = sortedBySpending.reduce((sum, item) => sum + item.total, 0);
+                    if (grandTotal > 0) {
+                        let cumulativeTotal = 0;
+                        const cumulativePercentage = sortedBySpending.map(item => (cumulativeTotal += item.total) / grandTotal * 100);
+                        createChart('paretoChart', {
+                            type: 'bar', data: { labels: sortedBySpending.map(d => d.unidade), datasets: [{ label: 'Custo', data: sortedBySpending.map(d => d.total), backgroundColor: '#4b5563', yAxisID: 'y' }, { label: '% Acumulada', data: cumulativePercentage, type: 'line', borderColor: '#d97706', backgroundColor: 'transparent', yAxisID: 'y1' }] },
+                            options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } }, scales: { x: { ticks: { autoSkip: true, maxRotation: 45 } }, y: { title: { display: true, text: 'Custo (R$)' }, ticks: { callback: value => formatCurrency(value) } }, y1: { type: 'linear', position: 'right', title: { display: true, text: '% Acumulada' }, grid: { drawOnChartArea: false }, ticks: { callback: value => `${value.toFixed(0)}%` } } } }
+                        });
+                    }
+                }
+            };
+            
+            function updateDashboard(pageNumToRender) {
+                if (pageNumToRender && renderFunctions[pageNumToRender]) {
+                    renderFunctions[pageNumToRender]();
+                }
+            }
+            
+            const unitSelector = document.getElementById('unitSelector');
+            aggregatedData.sort((a, b) => a.unidade.localeCompare(b.unidade)).forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit.unidade;
+                option.textContent = unit.unidade;
+                unitSelector.appendChild(option);
+            });
+
+            unitSelector.addEventListener('change', (e) => {
+                const selectedUnitName = e.target.value;
+                if (chartInstances['unitDetailChart']) chartInstances['unitDetailChart'].destroy();
+                if (selectedUnitName) {
+                    const unitData = aggregatedData.find(d => d.unidade === selectedUnitName);
+                    createChart('unitDetailChart', {
+                        type: 'bar', data: { labels: [unitData.unidade], datasets: [ { label: 'Nº de Atendimentos', data: [unitData.ordens], backgroundColor: '#3b82f6', yAxisID: 'y' }, { label: 'Custo de Material (R$)', data: [unitData.material], backgroundColor: '#16a34a', yAxisID: 'y1' } ] },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: true, anchor: 'end', align: 'top', offset: 4, font: { weight: 'bold' }, color: '#4b5563', formatter: (value, context) => context.datasetIndex === 1 ? formatCurrency(value) : value } }, scales: { y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Nº de Atendimentos' } }, y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Custo de Material (R$)' }, grid: { drawOnChartArea: false }, ticks: { callback: value => formatCurrency(value) } } } }
+                    });
+                }
+            });
+
+            const selectors = [document.getElementById('unitSelector1'), document.getElementById('unitSelector2')];
+            selectors.forEach(selector => {
+                if(!selector) return;
+                const placeholder = document.createElement('option');
+                placeholder.value = "";
+                placeholder.textContent = "Selecione...";
+                selector.appendChild(placeholder);
+                aggregatedData.forEach(unit => {
+                    const option = document.createElement('option');
+                    option.value = unit.unidade;
+                    option.textContent = unit.unidade;
+                    selector.appendChild(option);
+                });
+                selector.addEventListener('change', updateRadarChart);
+            });
+
+            function updateRadarChart() {
+                const selectedUnits = selectors.map(s => s.value).filter(v => v);
+                if (selectedUnits.length === 0) {
+                    if(chartInstances['radarChart']) chartInstances['radarChart'].destroy();
+                    return;
+                }
+                
+                const maxValues = {
+                    total: Math.max(...aggregatedData.map(d => d.total)),
+                    ordens: Math.max(...aggregatedData.map(d => d.ordens)),
+                    percent: Math.max(...aggregatedData.map(d => d.meta > 0 ? (d.ordens / d.meta) * 100 : 0))
+                };
+
+                const radarData = {
+                    labels: ['Custo Total', 'Nº Atendimentos', '% Meta Atingida'],
+                    datasets: selectedUnits.map((unitName, index) => {
+                        const unitData = aggregatedData.find(d => d.unidade === unitName);
+                        const percent = unitData.meta > 0 ? (unitData.ordens / unitData.meta) * 100 : 0;
+                        
+                        const colors = ['rgba(37, 99, 235, 0.2)', 'rgba(22, 163, 74, 0.2)'];
+                        const borderColors = ['rgb(37, 99, 235)', 'rgb(22, 163, 74)'];
+
+                        return {
+                            label: unitData.unidade,
+                            data: [
+                                (unitData.total / maxValues.total) * 100,
+                                (unitData.ordens / maxValues.ordens) * 100,
+                                (percent / maxValues.percent) * 100
+                            ],
+                            backgroundColor: colors[index],
+                            borderColor: borderColors[index],
+                            borderWidth: 2
+                        };
+                    })
+                };
+
+                createChart('radarChart', {
+                    type: 'radar',
+                    data: radarData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { 
+                            datalabels: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.dataset.label || '';
+                                        const pointLabel = context.label;
+                                        const unitData = aggregatedData.find(d => d.unidade === label);
+                                        if (!unitData) return '';
+
+                                        let rawValueText = '';
+                                        switch (pointLabel) {
+                                            case 'Custo Total':
+                                                rawValueText = formatCurrency(unitData.total);
+                                                break;
+                                            case 'Nº Atendimentos':
+                                                rawValueText = `${unitData.ordens} atendimentos`;
+                                                break;
+                                            case '% Meta Atingida':
+                                                const percent = unitData.meta > 0 ? (unitData.ordens / unitData.meta) * 100 : 0;
+                                                rawValueText = `${percent.toFixed(1)}%`;
+                                                break;
+                                        }
+                                        return `${pointLabel}: ${rawValueText}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            showPage(1);
+        });
+    </script>
+</body>
+</html>
